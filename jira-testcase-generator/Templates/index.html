@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QA Test Case Generator</title>
+</head>
+<body>
+    <h2>Generate Test Cases from Jira</h2>
+
+    <form action="/generate" method="post">
+        <label>Jira Description</label><br>
+        <textarea name="jira_description" rows="6" cols="80" required></textarea><br><br>
+
+        <label>Acceptance Criteria</label><br>
+        <textarea name="acceptance_criteria" rows="6" cols="80" required></textarea><br><br>
+
+        <button type="submit">Generate Test Script</button>
+    </form>
+</body>
+</html>
