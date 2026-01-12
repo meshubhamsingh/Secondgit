@@ -1,19 +1,121 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>QA Test Case Generator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jira to Test Script Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom style to make pasted text look like it does in Jira */
+        textarea {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            white-space: pre-wrap; /* Preserves formatting/newlines from Jira */
+        }
+    </style>
 </head>
-<body>
-    <h2>Generate Test Cases from Jira</h2>
+<body class="bg-slate-100 min-h-screen py-10 px-4">
 
-    <form action="/generate" method="post">
-        <label>Jira Description</label><br>
-        <textarea name="jira_description" rows="6" cols="80" required></textarea><br><br>
+    <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
+        
+        <div class="bg-blue-700 p-6 text-white text-center">
+            <h1 class="text-3xl font-bold">QA Test Script Generator</h1>
+            <p class="opacity-90 mt-2">Paste your Jira Story details below</p>
+        </div>
 
-        <label>Acceptance Criteria</label><br>
-        <textarea name="acceptance_criteria" rows="6" cols="80" required></textarea><br><br>
+        <form action="/generate" method="post" id="qaForm" class="p-8 space-y-6">
+            
+            <div>
+                <label class="block text-gray-700 font-bold mb-2 text-lg">
+                    1. Description
+                </label>
+                <p class="text-sm text-gray-500 mb-2">Copy & Paste the "Description" field from your Jira ticket here.</p>
+                <textarea 
+                    name="description" 
+                    rows="6" 
+                    required
+                    class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-inner text-gray-700"
+                    placeholder="Example: As a user, I want to upload a product PDF so that..."></textarea>
+            </div>
 
-        <button type="submit">Generate Test Script</button>
-    </form>
+            <div>
+                <label class="block text-gray-700 font-bold mb-2 text-lg">
+                    2. Acceptance Criteria
+                </label>
+                <p class="text-sm text-gray-500 mb-2">Copy & Paste the "Acceptance Criteria" list from Jira here.</p>
+                <textarea 
+                    name="acceptance_criteria" 
+                    rows="10" 
+                    required
+                    class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-inner text-gray-700"
+                    placeholder="- Verify user cannot upload .exe files&#10;- Verify max file size is 5MB&#10;- Verify success message appears..."></textarea>
+            </div>
+
+            <button type="submit" id="generateBtn"
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-lg text-xl shadow-md transition duration-200">
+                Generate Excel Script
+            </button>
+
+            <div id="loading" class="hidden text-center mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-700 mr-2"></div>
+                <span class="text-blue-800 font-medium">Reading webui.txt & generating scenarios... please wait...</span>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('qaForm');
+        const loading = document.getElementById('loading');
+        const btn = document.getElementById('generateBtn');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault(); // Stop the page from reloading/navigating away
+
+            // 1. Show Loading UI
+            loading.classList.remove('hidden');
+            btn.disabled = true;
+            btn.innerText = "Generating...";
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const formData = new FormData(form);
+
+            try {
+                // 2. Send Data to Python Backend
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                // 3. Check if response is an Error (JSON) or a File (Excel)
+                const contentType = response.headers.get("content-type");
+
+                if (contentType && contentType.includes("application/json")) {
+                    // It's an error message
+                    const errorData = await response.json();
+                    alert("Error: " + (errorData.error || "Unknown error occurred"));
+                } else {
+                    // It's the Excel file! trigger download manually
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = "Manual_Test_Scripts.xlsx"; // The filename
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                }
+
+            } catch (err) {
+                alert("Network Error: " + err.message);
+            } finally {
+                // 4. ALWAYS Hide Loading UI (Success or Fail)
+                loading.classList.add('hidden');
+                btn.disabled = false;
+                btn.innerText = "Generate Excel Script";
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        });
+    </script>
 </body>
 </html>
