@@ -1,0 +1,9 @@
+# Replace base_url with your real target once you have it.
+# Each entry under "steps" is one plain-English instruction, executed in order.
+name: example_login_and_add_customer
+base_url: https://www.amazon.in/
+steps:
+  - navigate to the base_url
+  - click on the search bar and search for "laptop"
+  - click on the first search result
+  - click on the add to cart button
