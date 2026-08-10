@@ -1,0 +1,16 @@
+Login Page:
+- Username
+- Password
+- Login Button
+
+Left Navigation:
+- Dashboard
+- Upload
+  - Upload Product
+  - Upload Bulk
+
+Upload Product Page:
+- Upload button
+- File input box
+- Product fields: Name, Category, Price, Description
+- Submit button
