@@ -1,0 +1,11 @@
+on:
+  workflow_dispatch:
+jobs:
+  my_job:
+    name: deploy to staging
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Hello, build and test
+      run: |
+        echo "Hello"
